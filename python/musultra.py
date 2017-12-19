@@ -18,7 +18,7 @@ python musonic.py -h
 
     EJECUTAR EJEMPLO:
 cd C:\s\git\arduino\picumple\python
-python musonic.py -e Ryosen -d 3
+python musonic.py -e Ryosen -d 3 -p -t C
 
     TODO:
 - Enviar a arduino el máximo de medida
@@ -68,8 +68,9 @@ if args.play and args.play:
 else:
     streamOn = 0
 
+puerto = 'COM11' if os.name == 'nt' else '/dev/ttyACM0'
 # Arduino
-arduino = serial.Serial('COM11', 9600, timeout=.1)
+arduino = serial.Serial(puerto, 9600, timeout=.1)
 distancias = []
 if args.tiker:
     tiker = int(args.tiker)
