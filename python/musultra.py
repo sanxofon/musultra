@@ -14,12 +14,10 @@ import os
 from escalas import escalas
 """
     EJECUTAR AYUDA:
-cd C:\s\git\arduino\picumple\python
-python musonic.py -h
+python musultra.py -h
 
     EJECUTAR EJEMPLO:
-cd C:\s\git\arduino\picumple\python
-python musonic.py -e Ryosen -d 3 -p -t C
+python musultra.py -e Ryosen -d 3 -p -t C
 
     TODO:
 - Enviar a arduino el máximo de medida
@@ -302,42 +300,42 @@ try:
             stream.stop_stream()
             stream.close()
             p.terminate()
-            time.sleep(0.5)
+            time.sleep(1)
             break
         elif keyboard.is_pressed('e'):
             e = raw_input(u"Nombre o índice de la escala: ")
             tryEscala(e)
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('1'):
             tryEscala("Cromática")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('2'):
             tryEscala("Lidia")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('3'):
             tryEscala("Mixolidia")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('4'):
             tryEscala("Mayor")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('5'):
             tryEscala("Dórica")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('6'):
             tryEscala("Jónica")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('7'):
             tryEscala("Menor")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('8'):
             tryEscala("Frigia")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('9'):
             tryEscala("Locria")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('0'):
             tryEscala("Ryosen")
-            time.sleep(0.5)
+            time.sleep(1)
         elif keyboard.is_pressed('space'):#if space is pressed
             if streamOn>0: 
                 streamOn = 0 
@@ -347,7 +345,7 @@ try:
                 streamOn = 1 
                 arduino.write('1')
                 stream.start_stream()
-            time.sleep(0.5)
+            time.sleep(1)
         cm = arduino.readline()
         if cm:
             try:
