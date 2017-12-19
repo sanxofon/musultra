@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# Author: Santiago Chávez Novaro (@sanxofon)
 from __future__ import print_function
 
 import pyaudio
