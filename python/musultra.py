@@ -46,6 +46,7 @@ parser.add_argument("-t", "--tonica", help=u"Tónica de la escala (A).")
 parser.add_argument("-p", "--play", help=u"Iniciar sonando.", action="store_true")
 parser.add_argument("-k", "--tiker", type=int, help=u"Número de iteraciones a promediar (3).")
 parser.add_argument("-m", "--max", type=int, help=u"Distancia máxima del sensor en cm (80).")
+parser.add_argument("-x", "--puerto", help=u"Puerto de conexión USB.")
 args = parser.parse_args()
 
 if os.name == 'nt':
@@ -67,8 +68,10 @@ if args.play and args.play:
     streamOn = 1
 else:
     streamOn = 0
-
-puerto = 'COM11' if os.name == 'nt' else '/dev/ttyACM0'
+if args.puerto:
+    puerto = args.puerto
+else: # Puertos Default para Windows (COM11) y para Linux (/dev/ttyACM0)
+    puerto = 'COM11' if os.name == 'nt' else '/dev/ttyACM0'
 # Arduino
 arduino = serial.Serial(puerto, 9600, timeout=.1)
 distancias = []
