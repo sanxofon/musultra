@@ -37,11 +37,21 @@ parser = argparse.ArgumentParser(description=u"MusUltra v0.5 - Santiago Chávez"
 parser.add_argument("-l", "--lista", help=u"Muestra un listado de las escalas definidas.", action="store_true")
 parser.add_argument("-e", "--escala", help=u"Define la escala a usar por nombre o por índice.")
 parser.add_argument("-c", "--continuo", help=u"No filtrar la salida con una escala.", action="store_true")
-parser.add_argument("-a", "--akey", type=float, help=u"Define el tono de A central (440.0).")
+parser.add_argument("-a", "--akey", type=float, help=u"Define el tono de A central (434.0).")
 parser.add_argument("-d", "--distancia", type=float, help=u"Distancia del intervalo en cm (2).")
-parser.add_argument("-o", "--octava", type=int, help=u"Define la octava inicial (1-10).")
+parser.add_argument("-o", "--octava", type=int, help=u"Define la octava inicial (2).")
 parser.add_argument("-s", "--subdiv", type=float, help=u"Subdivisiones en la octava (12).")
+parser.add_argument("-n", "--natural", help=u"Establecer afinación natural.", action="store_true")
+parser.add_argument("-t", "--tonica", help=u"Tónica de la escala (A).")
+parser.add_argument("-p", "--play", help=u"Iniciar sonando.", action="store_true")
+parser.add_argument("-k", "--tiker", type=int, help=u"Número de iteraciones a promediar (3).")
+parser.add_argument("-m", "--max", type=int, help=u"Distancia máxima del sensor en cm (80).")
 args = parser.parse_args()
+
+if os.name == 'nt':
+    # Cambia el set de caracteres en Windows Console
+    os.system('chcp 1252')
+
 if args.lista:
     os.system('cls' if os.name == 'nt' else 'clear')
     for i,l in enumerate(escalas.keys()):
@@ -53,13 +63,22 @@ if args.lista:
 #--------------------------------------------------------------------------------
 
 # Iniciar sonando
-streamOn = 0
+if args.play and args.play:
+    streamOn = 1
+else:
+    streamOn = 0
 
 # Arduino
 arduino = serial.Serial('COM11', 9600, timeout=.1)
 distancias = []
-tiker = 3
-maxdis = 80
+if args.tiker:
+    tiker = int(args.tiker)
+else:
+    tiker = 3
+if args.max:
+    maxdis = int(args.max)
+else:
+    maxdis = 80
 escout = ""
 
 # Globales
@@ -74,19 +93,30 @@ if args.subdiv:
     escal = args.subdiv
 else:
     escal = 12.0 # Subdivisiones en una octava
-if args.octava:
+if args.octava: # 0 a 10
     iniscal = args.octava - 4
 else:
-    iniscal = -3 # Octava más baja a partir de A central
+    iniscal = -3 # Octava más baja a partir de A central (-4 a 6)
 troot = np.power(2.0,1.0/escal); # escal'ava raiz de 2
 if args.akey:
     acentral = float(args.akey)
 else:
     acentral = 434.0 # A central en Hz
+natural = 0
+if args.natural:
+    natural = 1
 # Lista de intervalos
 listerval = []
 listaFreq = []
-
+# Notas y tonica
+notas = {'A':0,'A#':1,'Bb':1,'B':2,'C':3,'C#':4,'Db':4,'D':5,'D#':6,'Eb':6,'E':7,'F':8,'F#':9,'Gb':9,'G':10,'G#':11,'Ab':11}
+# notas = {'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11}
+if args.tonica and args.tonica in notas.keys():
+    tonica = notas[args.tonica]
+    ntonica = args.tonica
+else:
+    tonica = 0 # 0=C, 1=Db, 2=D, etc.
+    ntonica = 'A'
 # FUNCIONES ---------------------------------------------------------------------------
 def setListerval(filtrar):
     global escal, escala, maxdis,listerval,escout
@@ -96,7 +126,7 @@ def setListerval(filtrar):
         escout = filtrar.decode('utf-8')
         # escala = escalas["Cromática"] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         escala = escalas[filtrar]
-        for i in xrange(int(escal*100)):
+        for i in xrange(int(escal*1000)):
             r = i % 12
             while r<0:
                 r+=12
@@ -104,6 +134,7 @@ def setListerval(filtrar):
                 listerval.append(i)
         # La lista se corta en maxdist
         listerval = listerval[0:maxdis]
+        listerval = [0,0]+listerval
     else:
         escout = u"No se filtra la escala"
         # No se filtra la escala
@@ -111,7 +142,7 @@ def setListerval(filtrar):
 
 #continuo o afinado
 def setLF():
-    global listaFreq,listerval,maxdis,escal,iniscal
+    global listaFreq,listerval,maxdis,escal,iniscal,natural
     listaFreq = []
     for i in listerval:
         if natural>0:
@@ -122,11 +153,23 @@ def setLF():
         maxdis = len(listaFreq)
 
 def cabecera():
-    global acentral,iniscal,escout
+    global acentral,iniscal,escout,ntonica,stepf
     os.system('cls' if os.name == 'nt' else 'clear')
     if escout.encode('utf-8') in escalas.keys():
         escout = escout+" ("+str(escalas.keys().index(escout.encode('utf-8'))+1)+")"
-    print(" -----------------------\n|: Non Mus Ultra v0.5\n -----------------------\n|      A4: "+str(acentral)+" Hz\n|  Octava: "+str(iniscal+4)+"\n|  Escala: "+escout+"\n|  Interv: "+str(stepf)+"\n -----------------------\n|  [Space] - Play/Pausa\n|  [ESC]   - Salir\n -----------------------")
+    print(" --------------------------")
+    print("|: Non Mus Ultra v0.5")
+    print(" --------------------------")
+    print("|"+" "*(7-len(ntonica))+ntonica+"4: "+str(round(acentral,3))+" Hz")
+    print("|  Octava: "+str(iniscal+4))
+    print("|  Escala: "+escout+"")
+    print("|  Interv: "+str(stepf)+" cm")
+    print("|  MaxDis: "+str(maxdis)+" cm")
+    print(" --------------------------")
+    print("|       [e] - Escala")
+    print("| [Espacio] - Play/Pausa")
+    print("|     [ESC] - Salir")
+    print(" --------------------------")
     print("|   cm      ", " Hz"," "*40,sep=" ")
 
 def tryEscala(e):
@@ -203,22 +246,27 @@ def calcStepFreqJ(s):
 # FUNCIONES ---------------------------------------------------------------------------
 
 
+if tonica>1:
+    if natural>0:
+        acentral = calcStepFreqJ(tonica)
+    else:
+        acentral = calcStepFreq(tonica)
+
 if args.continuo:
     escout = u"Continua"
     afinado = 0
     basef = 22.5
     if args.distancia:
-        stepf=distancia
+        stepf=float(distancia)
     else:
         stepf = 5.0
 else:
     afinado = 1
      # Pasos cada stepf centrimetros
     if args.distancia:
-        stepf=args.distancia
+        stepf=float(args.distancia)
     else:
         stepf = 2.0
-    natural = 0
     # Filtrar por escala
     if args.escala:
         tryEscala(args.escala.strip())
@@ -234,10 +282,14 @@ stream = p.open(format=pyaudio.paFloat32,
                 stream_callback=callback)
 
 if streamOn>0:
+    stream.stop_stream()
+    time.sleep(2)
+    arduino.write('1')
+    time.sleep(1)
     stream.start_stream()
 else:
     stream.stop_stream()
-cabecera()
+# cabecera()
 try:
     while 1:
         if keyboard.is_pressed('esc'):#if space is pressed
@@ -245,30 +297,42 @@ try:
             stream.stop_stream()
             stream.close()
             p.terminate()
+            time.sleep(0.5)
             break
         elif keyboard.is_pressed('e'):
             e = raw_input(u"Nombre o índice de la escala: ")
             tryEscala(e)
+            time.sleep(0.5)
         elif keyboard.is_pressed('1'):
             tryEscala("Cromática")
+            time.sleep(0.5)
         elif keyboard.is_pressed('2'):
             tryEscala("Lidia")
+            time.sleep(0.5)
         elif keyboard.is_pressed('3'):
             tryEscala("Mixolidia")
+            time.sleep(0.5)
         elif keyboard.is_pressed('4'):
             tryEscala("Mayor")
+            time.sleep(0.5)
         elif keyboard.is_pressed('5'):
             tryEscala("Dórica")
+            time.sleep(0.5)
         elif keyboard.is_pressed('6'):
             tryEscala("Jónica")
+            time.sleep(0.5)
         elif keyboard.is_pressed('7'):
             tryEscala("Menor")
+            time.sleep(0.5)
         elif keyboard.is_pressed('8'):
             tryEscala("Frigia")
+            time.sleep(0.5)
         elif keyboard.is_pressed('9'):
             tryEscala("Locria")
+            time.sleep(0.5)
         elif keyboard.is_pressed('0'):
             tryEscala("Ryosen")
+            time.sleep(0.5)
         elif keyboard.is_pressed('space'):#if space is pressed
             if streamOn>0: 
                 streamOn = 0 
@@ -278,6 +342,7 @@ try:
                 streamOn = 1 
                 arduino.write('1')
                 stream.start_stream()
+            time.sleep(0.5)
         cm = arduino.readline()
         if cm:
             try:

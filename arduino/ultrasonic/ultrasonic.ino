@@ -11,6 +11,7 @@ const int bluPin = 3;
 long duration;
 int distance;
 int prendido=0;
+int maxset=1000;
 
 void setup() {
   
@@ -51,11 +52,11 @@ void loop() {
         // Calculating the distance
         // distance= duration*0.034/2; //cm
         distance= duration*0.34/2; //mm
-        if (prendido==1 && distance<800) {
+        if (prendido==1 && distance<maxset) {
           if (distance<50) {
-              setRGB(50,800,800);
+              setRGB(50,maxset,maxset);
           } else {
-              setRGB(50,800,800-distance);
+              setRGB(50,maxset,maxset-distance);
           }
           // setColor(distance, 255-distance, 0);
         }
@@ -65,7 +66,6 @@ void loop() {
             Serial.println(distance);
         }
     }
-    
 }
 
 void setRGB(float minimum, float maximum, int value) {
