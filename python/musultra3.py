@@ -49,7 +49,7 @@ if args.lista:
     for i,l in enumerate(list(escalas)):
         print((i+1),l,escalas[l])
         if i>=12 and i/12.0 == float(round(i/12.0)):
-            x=raw_input("")
+            x=input("")
             os.system('cls' if os.name == 'nt' else 'clear')
     sys.exit("")
 #--------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ try:
             time.sleep(1)
             break
         elif keyboard.is_pressed('e'):
-            e = raw_input(u"Nombre o índice de la escala: ")
+            e = input(u"Nombre o índice de la escala: ")
             tryEscala(e)
             time.sleep(1)
         elif keyboard.is_pressed('1'):
