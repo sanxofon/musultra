@@ -28,10 +28,10 @@ Python 2.7+
 
 	$ python musultra.py -h
 
-Python 3.4+
+## ToDo:
 
-	$ python musultra3.py -h
-
+	- Send max and min limits to arduino on startup and transfer (& test) calibration script to arduino itself.
+	- Improve RGB heat-map color settings
 
 ## Arduino set-up:
 
