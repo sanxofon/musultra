@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Author: Santiago Chávez Novaro (@sanxofon)
-from __future__ import print_function
-
 import pyaudio
 import numpy as np
 import time
@@ -24,12 +22,6 @@ python musultra.py -e Ryosen -d 3 -p -t C
 - Probar promediar tiker en arduino
 
 """
-
-# MAGICA CONFIGURACIÓN DE CODECS SALIDA ----------------------
-# FIX PARA WINDOWS CONSOLE, Usar: chcp 1252
-import codecs,locale,sys
-sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-#--------------------------------------------------------------------------------
 import argparse
 # Inicializamos el "parser" de argumentos con la descripción general
 parser = argparse.ArgumentParser(description=u"MusUltra v0.6 - Santiago Chávez")
@@ -54,8 +46,8 @@ if os.name == 'nt':
 
 if args.lista:
     os.system('cls' if os.name == 'nt' else 'clear')
-    for i,l in enumerate(escalas.keys()):
-        print((i+1),l.decode('utf-8'),escalas[l])
+    for i,l in enumerate(list(escalas)):
+        print((i+1),l,escalas[l])
         if i>=12 and i/12.0 == float(round(i/12.0)):
             x=raw_input("")
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -114,7 +106,7 @@ listaFreq = []
 # Notas y tonica
 notas = {'A':0,'A#':1,'Bb':1,'B':2,'C':3,'C#':4,'Db':4,'D':5,'D#':6,'Eb':6,'E':7,'F':8,'F#':9,'Gb':9,'G':10,'G#':11,'Ab':11}
 # notas = {'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'G#':8,'Ab':8,'A':9,'A#':10,'Bb':10,'B':11}
-if args.tonica and args.tonica in notas.keys():
+if args.tonica and args.tonica in list(notas):
     tonica = notas[args.tonica]
     ntonica = args.tonica
 else:
@@ -125,11 +117,11 @@ def setListerval(filtrar):
     global escal, escala, maxdis,listerval,escout
     # filtrar = "Be-Bop Semi-disminuida" #"Cromática", "Mayor", "Mixolidia", etc.
     listerval = []
-    if filtrar in escalas.keys():
-        escout = filtrar.decode('utf-8')
+    if filtrar in list(escalas):
+        escout = filtrar
         # escala = escalas["Cromática"] # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
         escala = escalas[filtrar]
-        for i in xrange(int(escal*1000)):
+        for i in range(int(escal*1000)):
             r = i % 12
             while r<0:
                 r+=12
@@ -141,7 +133,7 @@ def setListerval(filtrar):
     else:
         escout = u"No se filtra la escala"
         # No se filtra la escala
-        listerval = xrange(maxdis)
+        listerval = range(maxdis)
 
 #continuo o afinado
 def setLF():
@@ -158,8 +150,8 @@ def setLF():
 def cabecera():
     global acentral,iniscal,escout,ntonica,stepf
     os.system('cls' if os.name == 'nt' else 'clear')
-    if escout.encode('utf-8') in escalas.keys():
-        escout = escout+" ("+str(escalas.keys().index(escout.encode('utf-8'))+1)+")"
+    if escout in list(escalas):
+        escout = escout+" ("+str(list(escalas).index(escout)+1)+")"
     print(" --------------------------")
     print("|: Non Mus Ultra v0.6")
     print(" --------------------------")
@@ -180,7 +172,7 @@ def tryEscala(e):
     try:
         filtrar = int(e)-1 # 1, 2, 3, 4, etc.
         if filtrar>=0:
-            esk = escalas.keys()
+            esk = list(escalas)
             filtrar = esk[filtrar]
         else:
             filtrar = e #"Cromática", "Mayor", "Mixolidia", etc.
@@ -287,7 +279,7 @@ stream = p.open(format=pyaudio.paFloat32,
 if streamOn>0:
     stream.stop_stream()
     time.sleep(2)
-    arduino.write('1')
+    arduino.write(b'1')
     time.sleep(1)
     stream.start_stream()
 else:
@@ -296,7 +288,7 @@ else:
 try:
     while 1:
         if keyboard.is_pressed('esc'):#if space is pressed
-            arduino.write('2')
+            arduino.write(b'2')
             stream.stop_stream()
             stream.close()
             p.terminate()
@@ -339,11 +331,11 @@ try:
         elif keyboard.is_pressed('space'):#if space is pressed
             if streamOn>0: 
                 streamOn = 0 
-                arduino.write('2')
+                arduino.write(b'2')
                 stream.stop_stream()
             else:
                 streamOn = 1 
-                arduino.write('1')
+                arduino.write(b'1')
                 stream.start_stream()
             time.sleep(1)
         cm = arduino.readline()
