@@ -1,5 +1,9 @@
 # Non Mus Ultra v0.6
 
+[![Twitter: @sanxofon](https://img.shields.io/badge/contact-@sanxofon-blue.svg?style=flat)](https://twitter.com/sanxofon)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/sanxofon/musultra
+/blob/master/LICENSE)
+
 Python music instrument for arduino with an Utrasonic Ranging Module HC SR04
 
 ## Author:
