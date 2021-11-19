@@ -13,9 +13,14 @@ from escalas import escalas
 """
     EJECUTAR AYUDA:
 python musultra.py -h
+python musultra3.py -h
+
+
 
     EJECUTAR EJEMPLO:
 python musultra.py -e Ryosen -d 3 -p -t C
+python musultra3.py -e 22 -d 3 -p -t C -x COM4
+python musultra3.py -e 157 -d 3 -p -t C -x COM5
 
     TODO:
 - Enviar a arduino el máximo de medida
@@ -62,7 +67,7 @@ else:
 if args.puerto:
     puerto = args.puerto
 else: # Puertos Default para Windows (COM11) y para Linux (/dev/ttyACM0)
-    puerto = 'COM11' if os.name == 'nt' else '/dev/ttyACM0'
+    puerto = 'COM3' if os.name == 'nt' else '/dev/ttyACM0'
 # Arduino
 arduino = serial.Serial(puerto, 9600, timeout=.1)
 distancias = []
@@ -170,10 +175,10 @@ def cabecera():
 def tryEscala(e):
     global filtrar
     try:
-        filtrar = int(e)-1 # 1, 2, 3, 4, etc.
-        if filtrar>=0:
+        filtrarn = int(e)-1 # 1, 2, 3, 4, etc.
+        if filtrarn>=0:
             esk = list(escalas)
-            filtrar = esk[filtrar]
+            filtrar = esk[filtrarn]
         else:
             filtrar = e #"Cromática", "Mayor", "Mixolidia", etc.
     except:
@@ -266,7 +271,7 @@ else:
     if args.escala:
         tryEscala(args.escala.strip())
     else:
-        tryEscala("Cromática")
+        tryEscala("50")
 
 p = pyaudio.PyAudio()
 
@@ -296,37 +301,39 @@ try:
             break
         elif keyboard.is_pressed('e'):
             e = input(u"Nombre o índice de la escala: ")
+            if e[0]=='e':
+                e=e[1:]
             tryEscala(e)
             time.sleep(1)
+        elif keyboard.is_pressed('0'):
+            tryEscala("450") # Ryosen
+            time.sleep(1)
         elif keyboard.is_pressed('1'):
-            tryEscala("Cromática")
+            tryEscala("50") # Cromatica
             time.sleep(1)
         elif keyboard.is_pressed('2'):
-            tryEscala("Lidia")
+            tryEscala("237") # Mixolidia
             time.sleep(1)
         elif keyboard.is_pressed('3'):
-            tryEscala("Mixolidia")
+            tryEscala("143") # Lidia
             time.sleep(1)
         elif keyboard.is_pressed('4'):
-            tryEscala("Mayor")
+            tryEscala("300") # Raga Chandrakauns-Modern
             time.sleep(1)
         elif keyboard.is_pressed('5'):
-            tryEscala("Dórica")
+            tryEscala("100") # Hawayana 2
             time.sleep(1)
         elif keyboard.is_pressed('6'):
-            tryEscala("Jónica")
+            tryEscala("160") # Maqam Suzdil
             time.sleep(1)
         elif keyboard.is_pressed('7'):
-            tryEscala("Menor")
+            tryEscala("22") # Bi Yu
             time.sleep(1)
         elif keyboard.is_pressed('8'):
-            tryEscala("Frigia")
+            tryEscala("164") # Mayor
             time.sleep(1)
         elif keyboard.is_pressed('9'):
-            tryEscala("Locria")
-            time.sleep(1)
-        elif keyboard.is_pressed('0'):
-            tryEscala("Ryosen")
+            tryEscala("221") # Menor
             time.sleep(1)
         elif keyboard.is_pressed('space'):#if space is pressed
             if streamOn>0: 
